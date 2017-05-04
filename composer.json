@@ -1,0 +1,16 @@
+{
+    "require": {
+        "silex/silex": "~2.0",
+        "twig/twig": "^1.33",
+        "monolog/monolog": "^1.22",
+        "graphaware/neo4j-php-client": "^4.8"
+    },
+    "require-dev": {
+        "heroku/heroku-buildpack-php": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Neo4j\\Alexa\\": "src/"
+        }
+    }
+}

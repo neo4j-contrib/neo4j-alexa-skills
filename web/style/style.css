@@ -1,0 +1,13 @@
+.feed {
+    margin-top: 70px;
+}
+
+.feed > h3 {
+    padding-top:25px;
+    padding-left: 10px;
+    margin-bottom: 20px;
+}
+
+.card {
+    margin-bottom: 20px;
+}
