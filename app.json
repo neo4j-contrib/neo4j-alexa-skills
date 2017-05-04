@@ -1,0 +1,6 @@
+{
+  "name": "Neo4j Alexa Skills App",
+  "description": "A demo app that acts as API for Alexa Skills",
+  "repository": "https://neo4j.com",
+  "addons": []
+}
