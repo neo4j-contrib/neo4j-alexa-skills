@@ -10,7 +10,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Neo4j\\": "src/"
+            "Neo4j\\Alexa\\": "src/"
         }
     }
 }

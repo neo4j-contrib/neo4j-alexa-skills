@@ -57,9 +57,13 @@
             <div class="card-block">
                 <h4 class="card-title">Neo4j Alexa Skill</h4>
                 <h6 class="card-subtitle mb-2 text-muted">${card.intent.name}</h6>
-                <p class="card-text">Some description goes here</p>
-                <a href="#" class="card-link">${card.id}</a>
-                {#<a href="#" class="card-link">Another link</a>#}
+                <div class="card-text">
+                    <p>Slots :
+                <ul class="list-unstyled"><li v-for="(slot, index) in card.intent.slots">${index}: ${slot}</li></ul>
+                {#<a href="#" class="card-link">${card.id}</a>#}
+                <a href="#" class="card-link">${card.time}</a>
+                </p>
+                </div>
             </div>
         </div>
     </div>

@@ -8,6 +8,10 @@ var app = new Vue({
     mounted: function() {
         console.log('ready');
         this.loadFeed();
+
+        setInterval(function() {
+            this.loadFeed();
+        }.bind(this), 3000);
     },
     methods: {
         loadFeed: function() {
