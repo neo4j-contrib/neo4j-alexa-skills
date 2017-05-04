@@ -29,7 +29,7 @@ class DashboardController
                 'user' => sprintf('User %d', $i->identity()),
                 'time' => $i->get('time'),
                 'intent' => [
-                    'name' => $i->get('intent'),
+                    'name' => $i->value('intent', null),
                     'slots' => json_decode($i->get('slots'), true)
                 ]
             ];
