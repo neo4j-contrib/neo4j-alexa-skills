@@ -30,6 +30,8 @@ class IntentController extends Controller
             switch ($intent) {
                 case 'nodesCount':
                     return $this->nodesCountHandler($slots, $neo4jClient);
+                case 'rawText':
+                    return $this->rawTextHandler($slots, $neo4jClient);
                 default:
                     return $this->returnAlexaResponse('Neo4j Alexa Skill Intent not found', self::TEXT_TYPE, "I'm unable to process this intent");
             }
@@ -49,6 +51,33 @@ class IntentController extends Controller
         $result = $client->run($query)->firstRecord()->get('c');
 
         return $this->returnAlexaResponse('Nodes Count', self::TEXT_TYPE, sprintf('There are %d %s nodes in the database', $result, $label));
+    }
+
+    private function rawTextHandler(array $slots, Client $client)
+    {
+        if (!array_key_exists('Text', $slots)) {
+            throw new \RuntimeException(sprintf('Expected a slot named %s', 'Text'));
+        }
+
+        $text = explode(' ', $slots['Text']['value']);
+
+        $query = 'MERGE (n:User {id: {user}}) 
+        CREATE (i:Interaction {id: {sid} })
+        MERGE (n)-[:SAID_TO_ALEXA]->(i)
+        WITH i
+        UNWIND range(1, size({words})-1) AS e
+        MERGE (w:Word {id: {sid} + toString(e-1) }) SET w.value = {words}[e-1]
+        MERGE (w2:Word {id: {sid} + toString(e) }) SET w2.value = {words}[e]
+        MERGE (w)-[:NEXT]->(w2)
+        WITH i
+        MATCH (w:Word {id: {sid} + toString(0)})
+        MERGE (i)-[:FIRST_WORD]->(w)';
+
+        $params = ['words' => $text];
+        $client->run($query, $params);
+
+        return $this->returnAlexaResponse('rawText', self::TEXT_TYPE, sprintf('Received the following text: "%s"', $text));
+
     }
 
     public function getNodesCount(Request $request, Application $application)
