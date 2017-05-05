@@ -37,7 +37,7 @@ class IntentController extends Controller
             }
         } catch (\Exception $e) {
             $application['monolog']->addWarning($e->getMessage());
-            return new JsonResponse($e->getMessage(), $e->getCode());
+            return new JsonResponse($e->getMessage(), 500);
         }
     }
 
@@ -60,28 +60,26 @@ class IntentController extends Controller
             throw new \RuntimeException(sprintf('Expected a slot named %s', 'Text'));
         }
 
-        $text = explode(' ', $slots['Text']['value']);
+        $text = explode(' ', $slots['Text']);
 
-        $query = 'MERGE (n:User {id: {user}}) 
-        CREATE (i:Interaction {id: {sid} })
-        MERGE (n)-[:SAID_TO_ALEXA]->(i)
+        $query = ' 
+        CREATE (i:RawText {time: timestamp()})
         WITH i
         UNWIND range(1, size({words})-1) AS e
-        MERGE (w:Word {id: {sid} + toString(e-1) }) SET w.value = {words}[e-1]
-        MERGE (w2:Word {id: {sid} + toString(e) }) SET w2.value = {words}[e]
+        MERGE (w:Word {id: id(i) + toString(e-1) }) SET w.value = {words}[e-1]
+        MERGE (w2:Word {id: id(i) + toString(e) }) SET w2.value = {words}[e]
         MERGE (w)-[:NEXT]->(w2)
         WITH i
-        MATCH (w:Word {id: {sid} + toString(0)})
+        MATCH (w:Word {id: id(i) + toString(0)})
         MERGE (i)-[:FIRST_WORD]->(w)';
 
         $params = ['words' => $text];
         $client->run($query, $params);
 
-        return $this->returnAlexaResponse('rawText', self::TEXT_TYPE, sprintf('Received the following text: "%s"', $text));
-
+        return $this->returnAlexaResponse('rawText', self::TEXT_TYPE, sprintf('Received the following text: "%s"', implode(' ', $text)));
     }
 
-    public function getNodesCount(Request $request, Application $application)
+    public function getRawText(Request $request, Application $application)
     {
         /** @var Client $client */
         $client = $application['neo4j'];
@@ -94,14 +92,26 @@ class IntentController extends Controller
             $slots[$slot['name']] = $slot['value'];
         }
 
-        if (!array_key_exists('nodeLabel', $slots)) {
-            throw new \RuntimeException(sprintf('Expected a slot named %s', 'nodeLabel'));
+        if (!array_key_exists('Text', $slots)) {
+            throw new \RuntimeException(sprintf('Expected a slot named %s', 'Text'));
         }
 
-        $label = ucfirst(strtolower(trim($slots['nodeLabel'])));
-        $query = sprintf('MATCH (n:`%s`) RETURN count(n) AS c', $label);
-        $result = $client->run($query)->firstRecord()->get('c');
+        $text = explode(' ', $slots['Text']);
 
-        return $this->returnAlexaResponse('Nodes Count', self::TEXT_TYPE, sprintf('There are %d %s nodes in the database', $result, $label));
+        $query = ' 
+        CREATE (i:RawText {time: timestamp()})
+        WITH i
+        UNWIND range(1, size({words})-1) AS e
+        MERGE (w:Word {id: id(i) + toString(e-1) }) SET w.value = {words}[e-1]
+        MERGE (w2:Word {id: id(i) + toString(e) }) SET w2.value = {words}[e]
+        MERGE (w)-[:NEXT]->(w2)
+        WITH i
+        MATCH (w:Word {id: id(i) + toString(0)})
+        MERGE (i)-[:FIRST_WORD]->(w)';
+
+        $params = ['words' => $text];
+        $client->run($query, $params);
+
+        return $this->returnAlexaResponse('rawText', self::TEXT_TYPE, sprintf('Received the following text: "%s"', implode(' ', $text)));
     }
 }

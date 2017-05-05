@@ -1,0 +1,29 @@
+{
+  "session": {
+    "sessionId": "SessionId.b180b506-545a-4e73-b815-4f5516aa9810",
+    "application": {
+      "applicationId": "amzn1.ask.skill.33e52368-5385-4a35-9e60-afdcdec5346d"
+    },
+    "attributes": {},
+    "user": {
+      "userId": "amzn1.ask.account.AFWN6FWVDN2TFYS7YPARK5R66BIXW4VTDRLHM4FGJUTVC7ZLFSNZUPDILG5Z3MRYDSHDJEPWDQJ6L2L5AFJHXLII5C43NLYPRICT45ACFIH2WW53BUZCBW2GCWI475NW435B7JVBTEQGE7UKTZ2OMOMZPS36EVQJVPC7IQ5K3HUBKE2MOY3VKOGNTL3X4WHR4T5UI5BWHE23JDI"
+    },
+    "new": true
+  },
+  "request": {
+    "type": "IntentRequest",
+    "requestId": "EdwRequestId.d86af77f-b7ce-4fcd-a535-442dc3a61121",
+    "locale": "en-GB",
+    "timestamp": "2017-05-05T11:21:55Z",
+    "intent": {
+      "name": "rawText",
+      "slots": {
+        "Text": {
+          "name": "Text",
+          "value": "how to do a Neo4j backup"
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
