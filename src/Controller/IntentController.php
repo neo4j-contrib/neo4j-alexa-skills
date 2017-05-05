@@ -36,6 +36,7 @@ class IntentController extends Controller
                     return $this->returnAlexaResponse('Neo4j Alexa Skill Intent not found', self::TEXT_TYPE, "I'm unable to process this intent");
             }
         } catch (\Exception $e) {
+            $application['monolog']->addWarning($e->getMessage());
             return new JsonResponse($e->getMessage(), $e->getCode());
         }
     }
