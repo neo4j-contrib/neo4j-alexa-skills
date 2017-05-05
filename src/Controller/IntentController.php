@@ -60,7 +60,11 @@ class IntentController extends Controller
             throw new \RuntimeException(sprintf('Expected a slot named %s', 'Text'));
         }
 
-        $text = explode(' ', $slots['Text']);
+        $slot = $slots['Text'];
+        $slot = strtolower($slot);
+        $slot = str_replace('neo 4j', 'neo4j', $slot);
+
+        $text = explode(' ', $slot);
 
         $query = ' 
         CREATE (i:RawText {time: timestamp()})
