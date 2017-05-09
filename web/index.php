@@ -2,6 +2,8 @@
 
 require_once __DIR__.'/../vendor/autoload.php';
 
+$dotenv = new \Dotenv\Dotenv(__DIR__.'/..');
+$dotenv->load();
 $app = new Silex\Application();
 
 // Set up Twig Templating Engine

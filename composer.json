@@ -3,7 +3,8 @@
         "silex/silex": "~2.0",
         "twig/twig": "^1.33",
         "monolog/monolog": "^1.22",
-        "graphaware/neo4j-php-client": "^4.8"
+        "graphaware/neo4j-php-client": "^4.8",
+        "vlucas/phpdotenv": "^2.4"
     },
     "require-dev": {
         "heroku/heroku-buildpack-php": "*",
