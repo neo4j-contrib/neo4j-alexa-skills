@@ -63,7 +63,7 @@ class IntentController extends Controller
     private function nodesCountHandler(array $slots, Client $client)
     {
         $response = sprintf('Expected a slot named %s', 'nodeLabel');
-        $database = array_key_exists('nodeLabel', $slots) ? strtolower(" ","",$slots['database']): "default"
+        $database = array_key_exists('database', $slots) ? strtolower(" ","",$slots['database']): "default"
         if (array_key_exists('nodeLabel', $slots)) {
             $label = $this->extractLabel($slots['nodeLabel']);
             $result = $this->countNodes($label,$client,$database);
