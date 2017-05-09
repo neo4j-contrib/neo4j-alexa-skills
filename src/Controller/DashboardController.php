@@ -40,4 +40,25 @@ class DashboardController
 
         return new JsonResponse($interactions);
     }
+
+    public function connections(Application $application) : JsonResponse
+    {
+        /** @var Client $client */
+        $client = $application['neo4j'];
+        $connections = [];
+        foreach($_ENV as $k => $v) {
+            if (preg_match("/^NEO4J_URL_?(.*)/",$k, $match)) {
+                $alias = '' !== $match[1] ? $match[1] : 'default';
+                $connection = $client->getConnectionManager()->getConnection($alias);
+                try {
+                    $client->run('RETURN 1', [], null, $connection->getAlias());
+                    $connections[$alias] = true;
+                } catch (\Exception $e) {
+                    $connections[$alias] = false;
+                }
+            }
+        }
+
+        return new JsonResponse($connections);
+    }
 }

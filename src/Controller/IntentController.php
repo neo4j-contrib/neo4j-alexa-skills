@@ -53,7 +53,7 @@ class IntentController extends Controller
             }
         } catch (\Exception $e) {
             $application['monolog']->addWarning($e->getMessage());
-            return $this->returnAlexaResponse('Exception Encountered', self::TEXT_TYPE, $e->getMessage());
+            return $this->returnAlexaResponse('Exception Encountered', self::TEXT_TYPE, sprintf('An exception was encountered: %s', $e->getMessage()));
         }
     }
 
