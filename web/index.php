@@ -11,7 +11,9 @@ $app->register(new Silex\Provider\TwigServiceProvider(), array(
 
 // Set up Monolog
 $app->register(new Silex\Provider\MonologServiceProvider(), array(
-    'monolog.logfile' => __DIR__.'/development.log',
+#    'monolog.logfile' => __DIR__.'/development.log',
+    'monolog.logfile' => 'php://stderr',
+    'monolog.level' => \Monolog\Logger::WARNING,
 ));
 
 // Set up Neo4j Client
