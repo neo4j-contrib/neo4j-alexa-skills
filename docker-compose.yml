@@ -9,12 +9,18 @@ services:
       - NEO4J_AUTH=none
     ports:
       - "7474:7474"
+    networks:
+      backend:
   php:
     image: php:7-fpm
     expose:
       - "9000"
     volumes:
       - ./:/var/www/silex
+    links:
+      - neo4j
+    environment:
+      - NEO4J_URL=http://neo4j:7474
     networks:
       backend:
         aliases:
