@@ -18,13 +18,15 @@ $app->register(new Silex\Provider\MonologServiceProvider(), array(
 
 // Set up Neo4j Client
 $app['neo4j'] = function() {
-    $host = getenv('NEO4J_URL') !== false ? getenv('NEO4J_URL') : 'http://localhost:7474';
+    
+    $client = \GraphAware\Neo4j\Client\ClientBuilder::create();
+    foreach($_ENV as $k => $v) {
+        if (preg_match("/^NEO4J_URL_?(.*)/",$k, $match)) {
+            $client=$client->addConnection($match[1] ?: 'default', $v);
+        }
+    }
 
-    $client = \GraphAware\Neo4j\Client\ClientBuilder::create()
-        ->addConnection('default', $host)
-        ->build();
-
-    return $client;
+    return $client->build();
 };
 
 // Should come from environment variable

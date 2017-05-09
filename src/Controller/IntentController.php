@@ -25,8 +25,11 @@ class IntentController extends Controller
             $dt = new \DateTime("NOW", new \DateTimeZone("UTC"));
             $ts = $dt->format('Y-m-d-H:i:s');
 
-            $neo4jClient->run('CREATE (n:Interaction) SET n = {values}', ['values' => ['intent' => $intent, 'slots' => json_encode($slots), 'time' => $ts]]);
-
+            try {
+                $neo4jClient->run('CREATE (n:Interaction) SET n = {values}', ['values' => ['intent' => $intent, 'slots' => json_encode($slots), 'time' => $ts]]);
+            } catch (\Exception $e) {
+                $application['monolog']->addWarning($e->getMessage());
+            }
             switch ($intent) {
                 case 'nodesCount':
                     return $this->nodesCountHandler($slots, $neo4jClient);
@@ -41,17 +44,35 @@ class IntentController extends Controller
         }
     }
 
+    private function extractLabel(string $label)
+    {
+        # only use first word, remove trailing plural s  optionally check against labels in db ??
+        if (preg_match("/^\s*(\w+)s\b\s*/",trim($label),$match)) {
+            return ucfirst(strtolower(trim($match[1])));
+        }
+        return ucfirst(strtolower(trim($label)));
+    }
+
+    private function countNodes($label, Client $client)
+    {
+        $pattern = $label ? sprintf(':`%s`', $label) : "";
+        $query = sprintf('MATCH (%s) RETURN count(*) AS c', $pattern);
+        return $client->run($query)->firstRecord()->get('c');
+    }
+
     private function nodesCountHandler(array $slots, Client $client)
     {
-        if (!array_key_exists('nodeLabel', $slots)) {
-            throw new \RuntimeException(sprintf('Expected a slot named %s', 'nodeLabel'));
+        $response = sprintf('Expected a slot named %s', 'nodeLabel');
+        if (array_key_exists('nodeLabel', $slots)) {
+            $label = $this->extractLabel($slots['nodeLabel']);
+            $result = $this->countNodes($label,$client);
+            if ($result > 0)
+                $response = sprintf('There are %d %s nodes in the database', $result, $label);
+            else
+                $response = sprintf('There are %d total nodes in the database', $this->countNodes("",$client));
         }
 
-        $label = ucfirst(strtolower(trim($slots['nodeLabel'])));
-        $query = sprintf('MATCH (n:`%s`) RETURN count(n) AS c', $label);
-        $result = $client->run($query)->firstRecord()->get('c');
-
-        return $this->returnAlexaResponse('Nodes Count', self::TEXT_TYPE, sprintf('There are %d %s nodes in the database', $result, $label));
+        return $this->returnAlexaResponse('Nodes Count', self::TEXT_TYPE, $response);
     }
 
     private function rawTextHandler(array $slots, Client $client)
