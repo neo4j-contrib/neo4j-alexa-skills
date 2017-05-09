@@ -1,0 +1,40 @@
+{
+  "session": {
+    "sessionId": "SessionId.ad2d90b2-fa48-48f5-b7fa-64f2564d4473",
+    "application": {
+      "applicationId": "amzn1.ask.skill.4fbfa6c0-bdfd-450b-b7af-0f39a891df7e"
+    },
+    "attributes": {},
+    "user": {
+      "userId": "amzn1.ask.account.AHUTUGDS2GSPKY5IMTMRLZFBIME7CLLSYPAQ23ZH4JARPLDNOPMW72QDQJ5DAQ62YPKTJXCP23RK6WHYPZO4OWRCBYLRUU56TW5JILIRDSSNQSIMKVW5LUYIGGQR46B53OI6EYMZEB4NNBSKGVASHN747LGUGJFMTKBIOGL374SAEJ4WZ4UFFZEDPJQSVT43BELPKIT7IFM654A"
+    },
+    "new": true
+  },
+  "request": {
+    "type": "IntentRequest",
+    "requestId": "EdwRequestId.7545288a-8ea8-47ea-a70a-8dfe352f8139",
+    "locale": "en-US",
+    "timestamp": "2017-05-09T18:59:51Z",
+    "intent": {
+      "name": "neighbours",
+      "slots": {
+        "database": {
+          "name": "database",
+          "value": "movies"
+        },
+        "name": {
+          "name": "name",
+          "value": "Clint Eastwood"
+        },
+        "limit": {
+          "name": "limit"
+        },
+        "type": {
+          "name": "type",
+          "value": "acted in"
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

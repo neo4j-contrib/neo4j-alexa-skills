@@ -90,4 +90,3 @@ ENV/
 
 vendor/
 web/*.log
-composer.lock
