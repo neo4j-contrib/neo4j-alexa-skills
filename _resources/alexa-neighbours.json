@@ -27,7 +27,8 @@
           "value": "Clint Eastwood"
         },
         "limit": {
-          "name": "limit"
+          "name": "limit",
+          "value": 10
         },
         "type": {
           "name": "type",

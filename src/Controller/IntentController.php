@@ -120,15 +120,25 @@ class IntentController extends Controller
             $query = "CALL apoc.index.search('search',{name}+'~') yield node as from " .
             "RETURN coalesce(from.name, from.title, {name}) as from, size((from)-[".$type."]-()) as count, " .
             "[(from)-[".$type."]-(to) | coalesce(to.name, to.title, to.description, id(to))][0..{limit}] as neighbours";
-            $log->addWarning($query."; name:".$slots['name']." ".$database);
-            $result = $client->run($query,
-             ["name"=>$slots['name'],"limit"=>(intval($slots['limit'] ?: 5))],null,$database)->firstRecord();
 
-             $response = sprintf('%d nodes have or are %s to/of %s, for example: %s', 
+            $log->addDebug($query."; name:".$slots['name']." ".$database);
+            $result = $client->run(
+                $query,
+                [
+                    'name' => $slots['name'],
+                    'limit' => (intval($slots['limit'] ?: 5))
+                ],
+                null,
+                $database)
+                ->firstRecord();
+
+
+            $response = sprintf('%d nodes have or are %s to/of %s, for example: %s',
                 $result->get("count"),
-                $slots['type'], $result->get("name") ?: $slots['name'],
+                $slots['type'], $result->hasValue('name') ? $result->get('name') : $slots['name'],
                 implode(', ', $result->get("neighbours")));
-            $log->addWarning($response);
+
+            $log->addDebug($response);
         }
 
         return $this->returnAlexaResponse('Neighbours of', self::TEXT_TYPE, $response);
