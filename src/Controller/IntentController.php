@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Neo4j\Alexa\Controller;
 
+use Monolog\Logger;
 use Neo4j\Alexa\Helper\LevenshteinLabel;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -52,7 +53,7 @@ class IntentController extends Controller
             }
         } catch (\Exception $e) {
             $application['monolog']->addWarning($e->getMessage());
-            return new JsonResponse($e->getMessage(), 500);
+            return $this->returnAlexaResponse('Exception Encountered', self::TEXT_TYPE, $e->getMessage());
         }
     }
 
@@ -110,9 +111,9 @@ class IntentController extends Controller
     # "Who {acted in} node {the matrix} in {movies}"
     # "Who {directed} node {the matrix} in {movies}"
     # "What {acted in} node {clint eastwood} in {movies}"
-    private function neighboursHandler(array $slots, Client $client, $log)
+    private function neighboursHandler(array $slots, Client $client, Logger $log)
     {
-        $response = 'Missing inputs. I need the entitiy to inspect.';
+        $response = 'Missing inputs. I need the entity to inspect.';
         $database = array_key_exists('database', $slots) ? strtolower(str_replace(" ","",$slots['database'])): "default";
         if (array_key_exists('name', $slots)) {
         	$type = array_key_exists('type', $slots) ? (":`" . strtoupper(str_replace(" ","_",$slots['type']))) ."`" : "";
