@@ -20,7 +20,7 @@ class DashboardController
         $client = $application['neo4j'];
         $interactions = [];
 
-        $result = $client->run('MATCH (n:Interaction) RETURN n ORDER BY n.time DESC');
+        $result = $client->run('MATCH (n:Interaction) RETURN n ORDER BY n.time DESC',null,'alexa');
 
         foreach ($result->records() as $record) {
             $i = $record->nodeValue('n');

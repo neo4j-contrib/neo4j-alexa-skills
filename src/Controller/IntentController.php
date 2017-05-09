@@ -124,7 +124,7 @@ class IntentController extends Controller
             $query = "CALL apoc.index.search('search',{name}+'~') yield node as from " .
             "RETURN coalesce(from.name, from.title, {name}) as from, size((from)-[".$type."]-()) as count, " .
             "[(from)-[".$type."]-(to) | coalesce(to.name, to.title, to.description, id(to))][0..{limit}] as neighbours";
-            $log->addWarning($query."; name:".$slots['name']);
+            $log->addWarning($query."; name:".$slots['name']." ".$database);
             $result = $client->run($query,
              ["name"=>$slots['name'],"limit"=>(intval($slots['limit'] ?: 5))],null,$database)->firstRecord();
 
@@ -132,6 +132,7 @@ class IntentController extends Controller
                 $result->get("count"),
                 $slots['type'], $result->get("name") ?: $slots['name'],
                 implode(', ', $result->get("neighbours")));
+            $log->addWarning($response);
         }
 
         return $this->returnAlexaResponse('Neighbours of', self::TEXT_TYPE, $response);
@@ -161,7 +162,7 @@ class IntentController extends Controller
         MERGE (i)-[:FIRST_WORD]->(w)';
 
         $params = ['words' => $text];
-        $client->run($query, $params);
+        $client->run($query, $params,null,"alexa");
 
         return $this->returnAlexaResponse('rawText', self::TEXT_TYPE, sprintf('Received the following text: "%s"', implode(' ', $text)));
     }
@@ -197,7 +198,7 @@ class IntentController extends Controller
         MERGE (i)-[:FIRST_WORD]->(w)';
 
         $params = ['words' => $text];
-        $client->run($query, $params);
+        $client->run($query, $params,null,"alexa");
 
         return $this->returnAlexaResponse('rawText', self::TEXT_TYPE, sprintf('Received the following text: "%s"', implode(' ', $text)));
     }
