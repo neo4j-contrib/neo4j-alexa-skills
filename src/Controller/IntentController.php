@@ -34,10 +34,14 @@ class IntentController extends Controller
                 $application['monolog']->addWarning($e->getMessage());
             }
             switch ($intent) {
+# list registered databases
+# database statistics (top-3 labels, top 3 rel-types)
                 case 'nodesCount':
                     return $this->nodesCountHandler($slots, $neo4jClient);
                 case 'findBetween':
                     return $this->findBetweenHandler($slots, $neo4jClient);
+                case 'neighbours':
+                    return $this->neighboursHandler($slots, $neo4jClient, $application['monolog']);
                 case 'rawText':
                     return $this->rawTextHandler($slots, $neo4jClient);
                 default:
@@ -83,7 +87,7 @@ class IntentController extends Controller
 
     private function findBetweenHandler(array $slots, Client $client)
     {
-        $response = 'Missing inputs. We need two entities to connect.';
+        $response = 'Missing inputs. I need two entities to connect.';
         $database = array_key_exists('database', $slots) ? strtolower(str_replace(" ","",$slots['database'])): "default";
         if (array_key_exists('first', $slots) && array_key_exists('second', $slots)) {
             $result = $client->run(
@@ -104,6 +108,33 @@ class IntentController extends Controller
         }
 
         return $this->returnAlexaResponse('Path Between', self::TEXT_TYPE, $response);
+    }
+
+    # "What are the top {2} neighbours {connected to} node {Mar a Lago} in {trumpworld}"
+    # "What/who is {connected to} node {jared kushner} in {trumpworld}"
+    # "Who {acted in} node {the matrix} in {movies}"
+    # "Who {directed} node {the matrix} in {movies}"
+    # "What {acted in} node {clint eastwood} in {movies}"
+    private function neighboursHandler(array $slots, Client $client, $log)
+    {
+        $response = 'Missing inputs. I need the entitiy to inspect.';
+        $database = array_key_exists('database', $slots) ? strtolower(str_replace(" ","",$slots['database'])): "default";
+        if (array_key_exists('name', $slots)) {
+        	$type = array_key_exists('type', $slots) ? (":`" . strtoupper(str_replace(" ","_",$slots['type']))) ."`" : "";
+            $query = "CALL apoc.index.search('search',{name}+'~') yield node as from " .
+            "RETURN coalesce(from.name, from.title, {name}) as from, size((from)-[".$type."]-()) as count, " .
+            "[(from)-[".$type."]-(to) | coalesce(to.name, to.title, to.description, id(to))][0..{limit}] as neighbours";
+            $log->addWarning($query."; name:".$slots['name']);
+            $result = $client->run($query,
+             ["name"=>$slots['name'],"limit"=>(intval($slots['limit'] ?: 5))],null,$database)->firstRecord();
+
+             $response = sprintf('%d nodes have or are %s to/of %s, for example: %s', 
+                $result->get("count"),
+                $slots['type'], $result->get("name") ?: $slots['name'],
+                implode(', ', $result->get("neighbours")));
+        }
+
+        return $this->returnAlexaResponse('Neighbours of', self::TEXT_TYPE, $response);
     }
 
     private function rawTextHandler(array $slots, Client $client)
