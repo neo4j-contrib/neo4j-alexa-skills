@@ -68,7 +68,7 @@ class IntentController extends Controller
     private function nodesCountHandler(array $slots, Client $client)
     {
         $response = sprintf('Expected a slot named %s', 'nodeLabel');
-        $database = array_key_exists('database', $slots) ? strtolower(str_replace(" ","",$slots['database'])): "default"
+        $database = array_key_exists('database', $slots) ? strtolower(str_replace(" ","",$slots['database'])): "default";
         if (array_key_exists('nodeLabel', $slots)) {
             $label = $this->extractLabel($slots['nodeLabel']);
             $result = $this->countNodes($label,$client,$database);
@@ -88,13 +88,19 @@ class IntentController extends Controller
         if (array_key_exists('first', $slots) && array_key_exists('second', $slots)) {
             $result = $client->run(
 
-            "CALL apoc.index.search({first}+"~")  yield node as from " .
-            "CALL apoc.index.search({second}+"~") yield node as to WITH from, to LIMIT 1 ".
+            "CALL apoc.index.search('search',{first}+'~')  yield node as from " .
+            "CALL apoc.index.search('search',{second}+'~') yield node as to WITH from, to LIMIT 1 ".
             "OPTIONAL MATCH path = shortestPath((from)-[*..10]-(to)) ".
-            "RETURN [x IN nodes(path)[1..-2] | coalesce(x.name, x.title, x.description, id(x))] as names ",
+            "WITH *, [x IN nodes(path) | coalesce(x.name, x.title, x.description, id(x))] as names ".
+            "RETURN coalesce(from.name, from.title, {first}) as first, " .
+            " coalesce(to.name, to.title, {second}) as second, names[1..-1] as names",
 
-             ["first"=>$slots['first'],"second"=>$slots['second']],null,$database)->firstRecord()->get('names');
-             $response = sprintf('Between %s and %s there are %s', $first, $second, implode(' ', $result));
+             ["first"=>$slots['first'],"second"=>$slots['second']],null,$database)->firstRecord();
+
+             $response = sprintf('Between %s and %s there are %s', 
+                $result->get("first") ?: $slots['first'], 
+                $result->get("second") ?: $slots['second'], 
+                implode(', ', $result->get("names")));
         }
 
         return $this->returnAlexaResponse('Path Between', self::TEXT_TYPE, $response);
