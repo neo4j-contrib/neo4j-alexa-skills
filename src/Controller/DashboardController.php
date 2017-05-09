@@ -8,11 +8,10 @@ use GraphAware\Neo4j\Client\Client;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 class DashboardController
 {
-    public function index(Request $request, Application $application) : Response
+    public function index(Application $application) : string
     {
         return $application['twig']->render('hello.twig', []);
     }
