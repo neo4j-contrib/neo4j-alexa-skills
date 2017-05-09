@@ -11,4 +11,9 @@ https://docs.google.com/document/d/1OdVme2kIhOXqbhHYSA2e_d07zjDs7M19sDuXmxJXKOM/
 
 [Link to quickstart tutorial](_resources/quickstart.md) 
 
+### Run locally
+
+```bash
+docker-compose up
+```
 
