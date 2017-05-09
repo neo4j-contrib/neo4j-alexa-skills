@@ -26,13 +26,18 @@ class IntentController extends Controller
             $ts = $dt->format('Y-m-d-H:i:s');
 
             try {
-                $neo4jClient->run('CREATE (n:Interaction) SET n = {values}', ['values' => ['intent' => $intent, 'slots' => json_encode($slots), 'time' => $ts]]);
+                $neo4jClient->run(
+                'CREATE (n:Interaction) SET n = {values}', 
+                ['values' => ['intent' => $intent, 'slots' => json_encode($slots), 'time' => $ts]],
+                null,"alexa");
             } catch (\Exception $e) {
                 $application['monolog']->addWarning($e->getMessage());
             }
             switch ($intent) {
                 case 'nodesCount':
                     return $this->nodesCountHandler($slots, $neo4jClient);
+                case 'findBetween':
+                    return $this->findBetweenHandler($slots, $neo4jClient);
                 case 'rawText':
                     return $this->rawTextHandler($slots, $neo4jClient);
                 default:
@@ -74,6 +79,25 @@ class IntentController extends Controller
         }
 
         return $this->returnAlexaResponse('Nodes Count', self::TEXT_TYPE, $response);
+    }
+
+    private function findBetweenHandler(array $slots, Client $client)
+    {
+        $response = 'Missing inputs. We need two entities to connect.';
+        $database = array_key_exists('database', $slots) ? strtolower(str_replace(" ","",$slots['database'])): "default";
+        if (array_key_exists('first', $slots) && array_key_exists('second', $slots)) {
+            $result = $client->run(
+
+            "CALL apoc.index.search({first}+"~")  yield node as from " .
+            "CALL apoc.index.search({second}+"~") yield node as to WITH from, to LIMIT 1 ".
+            "OPTIONAL MATCH path = shortestPath((from)-[*..10]-(to)) ".
+            "RETURN [x IN nodes(path)[1..-2] | coalesce(x.name, x.title, x.description, id(x))] as names ",
+
+             ["first"=>$slots['first'],"second"=>$slots['second']],null,$database)->firstRecord()->get('names');
+             $response = sprintf('Between %s and %s there are %s', $first, $second, implode(' ', $result));
+        }
+
+        return $this->returnAlexaResponse('Path Between', self::TEXT_TYPE, $response);
     }
 
     private function rawTextHandler(array $slots, Client $client)
