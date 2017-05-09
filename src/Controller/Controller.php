@@ -1,15 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Neo4j\Alexa\Controller;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 abstract class Controller
 {
-    const TEXT_TYPE = "PlainText";
-    const SSML_TYPE = "SSML";
+    const TEXT_TYPE = 'PlainText';
+    const SSML_TYPE = 'SSML';
 
-    protected function returnAlexaResponse($title, $type, $output)
+    protected function returnAlexaResponse(string $title, string $type, string $output) : JsonResponse
     {
         $data = [
             'version' => '1.0',

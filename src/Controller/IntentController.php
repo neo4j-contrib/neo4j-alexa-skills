@@ -1,7 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Neo4j\Alexa\Controller;
 
+use Monolog\Logger;
+use Neo4j\Alexa\Helper\LevenshteinLabel;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -9,7 +13,7 @@ use GraphAware\Neo4j\Client\Client;
 
 class IntentController extends Controller
 {
-    public function handleIntent(Request $request, Application $application)
+    public function handleIntent(Request $request, Application $application) : JsonResponse
     {
         try {
             /** @var Client $neo4jClient */
@@ -49,33 +53,25 @@ class IntentController extends Controller
             }
         } catch (\Exception $e) {
             $application['monolog']->addWarning($e->getMessage());
-            return new JsonResponse($e->getMessage(), 500);
+            return $this->returnAlexaResponse('Exception Encountered', self::TEXT_TYPE, sprintf('An exception was encountered: %s', $e->getMessage()));
         }
     }
 
-    private function extractLabel(string $label)
-    {
-        # only use first word, remove trailing plural s  optionally check against labels in db ??
-        if (preg_match("/^\s*(\w+)s\b\s*/",trim($label),$match)) {
-            return ucfirst(strtolower(trim($match[1])));
-        }
-        return ucfirst(strtolower(trim($label)));
-    }
-
-    private function countNodes(string $label, Client $client,string $database)
+    private function countNodes(string $label, Client $client, string $database): int
     {
         $pattern = $label ? sprintf(':`%s`', $label) : "";
         $query = sprintf('MATCH (%s) RETURN count(*) AS c', $pattern);
         return $client->run($query,null,null,$database)->firstRecord()->get('c');
     }
 
-    private function nodesCountHandler(array $slots, Client $client)
+    private function nodesCountHandler(array $slots, Client $client) : JsonResponse
     {
         $response = sprintf('Expected a slot named %s', 'nodeLabel');
         $database = array_key_exists('database', $slots) ? strtolower(str_replace(" ","",$slots['database'])): "default";
         if (array_key_exists('nodeLabel', $slots)) {
-            $label = $this->extractLabel($slots['nodeLabel']);
-            $result = $this->countNodes($label,$client,$database);
+
+            $label = $this->extractLabel($slots['nodeLabel'], $client);
+            $result = $this->countNodes($label, $client, $database);
             if ($result > 0)
                 $response = sprintf('There are %d %s nodes in the database', $result, $label);
             else
@@ -85,7 +81,7 @@ class IntentController extends Controller
         return $this->returnAlexaResponse('Nodes Count', self::TEXT_TYPE, $response);
     }
 
-    private function findBetweenHandler(array $slots, Client $client)
+    private function findBetweenHandler(array $slots, Client $client) : JsonResponse
     {
         $response = 'Missing inputs. I need two entities to connect.';
         $database = array_key_exists('database', $slots) ? strtolower(str_replace(" ","",$slots['database'])): "default";
@@ -115,9 +111,9 @@ class IntentController extends Controller
     # "Who {acted in} node {the matrix} in {movies}"
     # "Who {directed} node {the matrix} in {movies}"
     # "What {acted in} node {clint eastwood} in {movies}"
-    private function neighboursHandler(array $slots, Client $client, $log)
+    private function neighboursHandler(array $slots, Client $client, Logger $log)
     {
-        $response = 'Missing inputs. I need the entitiy to inspect.';
+        $response = 'Missing inputs. I need the entity to inspect.';
         $database = array_key_exists('database', $slots) ? strtolower(str_replace(" ","",$slots['database'])): "default";
         if (array_key_exists('name', $slots)) {
         	$type = array_key_exists('type', $slots) ? (":`" . strtoupper(str_replace(" ","_",$slots['type']))) ."`" : "";
@@ -138,7 +134,19 @@ class IntentController extends Controller
         return $this->returnAlexaResponse('Neighbours of', self::TEXT_TYPE, $response);
     }
 
-    private function rawTextHandler(array $slots, Client $client)
+    private function extractLabel(string $input, Client $client) : string
+    {
+        $labels = $this->getDatabaseLabels($client);
+        $found = LevenshteinLabel::getNearest($input, $labels);
+
+        if ('' === $found || 0 === count($labels)) {
+            throw new \RuntimeException('Unable to guess the label or no database labels found');
+        }
+
+        return $found;
+    }
+
+    private function rawTextHandler(array $slots, Client $client) : JsonResponse
     {
         if (!array_key_exists('Text', $slots)) {
             throw new \RuntimeException(sprintf('Expected a slot named %s', 'Text'));
@@ -167,7 +175,7 @@ class IntentController extends Controller
         return $this->returnAlexaResponse('rawText', self::TEXT_TYPE, sprintf('Received the following text: "%s"', implode(' ', $text)));
     }
 
-    public function getRawText(Request $request, Application $application)
+    public function getRawText(Request $request, Application $application) : JsonResponse
     {
         /** @var Client $client */
         $client = $application['neo4j'];
@@ -201,5 +209,12 @@ class IntentController extends Controller
         $client->run($query, $params,null,"alexa");
 
         return $this->returnAlexaResponse('rawText', self::TEXT_TYPE, sprintf('Received the following text: "%s"', implode(' ', $text)));
+    }
+
+    private function getDatabaseLabels(Client $client) : array
+    {
+        $result = $client->run('CALL db.labels() YIELD label RETURN collect(label) AS labels');
+
+        return $result->firstRecord()->get('labels');
     }
 }
