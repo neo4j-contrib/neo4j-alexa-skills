@@ -6,11 +6,17 @@
         "graphaware/neo4j-php-client": "^4.8"
     },
     "require-dev": {
-        "heroku/heroku-buildpack-php": "*"
+        "heroku/heroku-buildpack-php": "*",
+        "phpunit/phpunit": "^6.1"
     },
     "autoload": {
         "psr-4": {
             "Neo4j\\Alexa\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Neo4j\\Alexa\\Tests\\": "tests"
         }
     }
 }
