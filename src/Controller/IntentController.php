@@ -53,23 +53,24 @@ class IntentController extends Controller
         return ucfirst(strtolower(trim($label)));
     }
 
-    private function countNodes($label, Client $client)
+    private function countNodes(string $label, Client $client,string $database)
     {
         $pattern = $label ? sprintf(':`%s`', $label) : "";
         $query = sprintf('MATCH (%s) RETURN count(*) AS c', $pattern);
-        return $client->run($query)->firstRecord()->get('c');
+        return $client->run($query,null,null,$database)->firstRecord()->get('c');
     }
 
     private function nodesCountHandler(array $slots, Client $client)
     {
         $response = sprintf('Expected a slot named %s', 'nodeLabel');
+        $database = array_key_exists('nodeLabel', $slots) ? strtolower(" ","",$slots['database']): "default"
         if (array_key_exists('nodeLabel', $slots)) {
             $label = $this->extractLabel($slots['nodeLabel']);
-            $result = $this->countNodes($label,$client);
+            $result = $this->countNodes($label,$client,$database);
             if ($result > 0)
                 $response = sprintf('There are %d %s nodes in the database', $result, $label);
             else
-                $response = sprintf('There are %d total nodes in the database', $this->countNodes("",$client));
+                $response = sprintf('There are %d total nodes in the database', $this->countNodes("",$client,$database));
         }
 
         return $this->returnAlexaResponse('Nodes Count', self::TEXT_TYPE, $response);
