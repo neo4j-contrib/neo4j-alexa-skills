@@ -62,7 +62,7 @@ class IntentController extends Controller
     {
         $pattern = $label ? sprintf(':`%s`', $label) : "";
         $query = sprintf('MATCH (%s) RETURN count(*) AS c', $pattern);
-        return $client->run($query,null,null,$database)->firstRecord()->get('c');
+        return $client->run($query, [], null, $database)->firstRecord()->get('c');
     }
 
     private function nodesCountHandler(array $slots, Client $client) : JsonResponse

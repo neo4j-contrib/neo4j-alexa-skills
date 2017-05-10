@@ -1,0 +1,33 @@
+{
+  "session": {
+    "sessionId": "SessionId.df45da3a-588d-4c24-ac46-45ba43c30cff",
+    "application": {
+      "applicationId": "amzn1.ask.skill.33e52368-5385-4a35-9e60-afdcdec5346d"
+    },
+    "attributes": {},
+    "user": {
+      "userId": "amzn1.ask.account.AFWN6FWVDN2TFYS7YPARK5R66BIXW4VTDRLHM4FGJUTVC7ZLFSNZUPDILG5Z3MRYDSHDJEPWDQJ6L2L5AFJHXLII5C43NLYPRICT45ACFIH2WW53BUZCBW2GCWI475NW435B7JVBTEQGE7UKTZ2OMOMZPS36EVQJVPC7IQ5K3HUBKE2MOY3VKOGNTL3X4WHR4T5UI5BWHE23JDI"
+    },
+    "new": true
+  },
+  "request": {
+    "type": "IntentRequest",
+    "requestId": "EdwRequestId.9460a5c8-8e0d-45a6-aae0-6eab1d8a9e5b",
+    "locale": "en-US",
+    "timestamp": "2017-05-10T13:23:02Z",
+    "intent": {
+      "name": "nodesCount",
+      "slots": {
+        "database": {
+          "name": "database",
+          "value": "trumpworld"
+        },
+        "nodeLabel": {
+          "name": "nodeLabel",
+          "value": "person"
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
