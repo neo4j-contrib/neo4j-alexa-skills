@@ -68,7 +68,8 @@ class IntentController extends Controller
     private function nodesCountHandler(array $slots, Client $client) : JsonResponse
     {
         $response = sprintf('Expected a slot named %s', 'nodeLabel');
-        $database = array_key_exists('database', $slots) ? strtolower(str_replace(" ","",$slots['database'])): "default";
+        $database = array_key_exists('database', $slots) ? strtolower(str_replace(' ', '', $slots['database'])): 'default';
+        $database = $this->guessDatabase($database);
         if (array_key_exists('nodeLabel', $slots)) {
 
             $label = $this->extractLabel($slots['nodeLabel'], $client, $database);
@@ -85,7 +86,8 @@ class IntentController extends Controller
     private function findBetweenHandler(array $slots, Client $client) : JsonResponse
     {
         $response = 'Missing inputs. I need two entities to connect.';
-        $database = array_key_exists('database', $slots) ? strtolower(str_replace(" ","",$slots['database'])): "default";
+        $database = array_key_exists('database', $slots) ? strtolower(str_replace(' ', '', $slots['database'])): 'default';
+        $database = $this->guessDatabase($database);
         if (array_key_exists('first', $slots) && array_key_exists('second', $slots)) {
             $result = $client->run(
 
@@ -115,7 +117,8 @@ class IntentController extends Controller
     private function neighboursHandler(array $slots, Client $client, Logger $log)
     {
         $response = 'Missing inputs. I need the entity to inspect.';
-        $database = array_key_exists('database', $slots) ? strtolower(str_replace(" ","",$slots['database'])): "default";
+        $database = array_key_exists('database', $slots) ? strtolower(str_replace(' ', '', $slots['database'])): 'default';
+        $database = $this->guessDatabase($database);
         if (array_key_exists('name', $slots)) {
         	$type = array_key_exists('type', $slots) ? (":`" . strtoupper(str_replace(" ","_",$slots['type']))) ."`" : "";
             $query = "CALL apoc.index.search('search',{name}+'~') yield node as from " .
@@ -147,7 +150,7 @@ class IntentController extends Controller
 
     private function extractLabel(?string $input, Client $client, ?string $database) : string
     {
-        $labels = $this->getDatabaseLabels($client, [], null, $database);
+        $labels = $this->getDatabaseLabels($client, $database);
         $found = LevenshteinLabel::getNearest($input, $labels);
 
         if ('' === $found || 0 === count($labels)) {
@@ -222,10 +225,23 @@ class IntentController extends Controller
         return $this->returnAlexaResponse('rawText', self::TEXT_TYPE, sprintf('Received the following text: "%s"', implode(' ', $text)));
     }
 
-    private function getDatabaseLabels(Client $client) : array
+    private function getDatabaseLabels(Client $client, ?string $database) : array
     {
-        $result = $client->run('CALL db.labels() YIELD label RETURN collect(label) AS labels');
+        $result = $client->run('CALL db.labels() YIELD label RETURN collect(label) AS labels', [], null, $database);
 
         return $result->firstRecord()->get('labels');
+    }
+
+    private function guessDatabase(string $input) : string
+    {
+        $aliases = [];
+        foreach($_ENV as $k => $v) {
+            if (preg_match("/^NEO4J_URL_?(.*)/",$k, $match)) {
+                $alias = '' !== $match[1] ? $match[1] : 'default';
+                $aliases[] = $alias;
+            }
+        }
+
+        return LevenshteinLabel::getNearest($input, $aliases, true);
     }
 }

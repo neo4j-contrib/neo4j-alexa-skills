@@ -6,7 +6,7 @@ namespace Neo4j\Alexa\Helper;
 
 class LevenshteinLabel
 {
-    public static function getNearest($input, array $labels) : string
+    public static function getNearest($input, array $labels, ?bool $adaptCost = false) : string
     {
         if (null === $input) {
             return '';
@@ -17,7 +17,7 @@ class LevenshteinLabel
 
         foreach ($labels as $label) {
             $sanitized = strtolower(trim($label));
-            $lev = levenshtein($input, $sanitized);
+            $lev = $adaptCost ? levenshtein($input, $sanitized, 1, 1, 10) : levenshtein($input, $sanitized);
 
             if (0 === $lev) {
                 return $label;
