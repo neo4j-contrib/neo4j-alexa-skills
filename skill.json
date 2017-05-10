@@ -1,0 +1,308 @@
+{
+  "intents": [
+    {
+      "name": "AMAZON.CancelIntent",
+      "samples": []
+    },
+    {
+      "name": "AMAZON.HelpIntent",
+      "samples": []
+    },
+    {
+      "name": "AMAZON.StopIntent",
+      "samples": []
+    },
+    {
+      "name": "findBetween",
+      "samples": [
+        "what is between {first} and {second} in {database} ",
+        "who is between {first} and {second} in {database} ",
+        "find the path between {first} and {second} in {database} ",
+        "find the path between {first} and {second}",
+        "who is between {first} and {second}",
+        "what is between {first} and {second}",
+        "find the connection between {first} and {second} "
+      ],
+      "slots": [
+        {
+          "name": "first",
+          "type": "AMAZON.Person",
+          "samples": []
+        },
+        {
+          "name": "second",
+          "type": "AMAZON.Person",
+          "samples": []
+        },
+        {
+          "name": "database",
+          "type": "Database",
+          "samples": []
+        }
+      ]
+    },
+    {
+      "name": "neighbours",
+      "samples": [
+        "What is {type} node {name} in {database}",
+        "Who is {type} node {name} in {database}",
+        "Who {type} node {name} in {database}",
+        "What {type} node {name} in {database}",
+        "What are the top {limit} neighbours {type} node {name} in {database}"
+      ],
+      "slots": [
+        {
+          "name": "database",
+          "type": "Database",
+          "samples": []
+        },
+        {
+          "name": "name",
+          "type": "AMAZON.Person",
+          "samples": []
+        },
+        {
+          "name": "type",
+          "type": "Verb",
+          "samples": []
+        },
+        {
+          "name": "limit",
+          "type": "AMAZON.NUMBER",
+          "samples": []
+        }
+      ]
+    },
+    {
+      "name": "nodesCount",
+      "samples": [
+        "count {nodeLabel} nodes",
+        "How many nodes of type {nodeLabel} are in the database",
+        "How many nodes of type {nodeLabel} are there",
+        "What is the number  of {nodeLabel} nodes",
+        "How many {nodeLabel} nodes are in the database",
+        "How many {nodeLabel} nodes are in {database}",
+        "count {nodeLabel} nodes in {database} "
+      ],
+      "slots": [
+        {
+          "name": "nodeLabel",
+          "type": "NodeLabel",
+          "samples": []
+        },
+        {
+          "name": "database",
+          "type": "Database",
+          "samples": []
+        }
+      ]
+    }
+  ],
+  "types": [
+    {
+      "name": "Database",
+      "values": [
+        {
+          "name": {
+            "value": "Trumpworld"
+          }
+        },
+        {
+          "name": {
+            "value": "Panama Papers"
+          }
+        },
+        {
+          "name": {
+            "value": "Movies"
+          }
+        },
+        {
+          "name": {
+            "value": "Recommendations"
+          }
+        },
+        {
+          "name": {
+            "value": "Agenda"
+          }
+        },
+        {
+          "name": {
+            "value": "Community Graph"
+          }
+        },
+        {
+          "name": {
+            "value": "GraphQL"
+          }
+        },
+        {
+          "name": {
+            "value": "Neo4j"
+          }
+        },
+        {
+          "name": {
+            "value": "legis"
+          }
+        }
+      ]
+    },
+    {
+      "name": "NodeLabel",
+      "values": [
+        {
+          "name": {
+            "value": "User"
+          }
+        },
+        {
+          "name": {
+            "value": "Person"
+          }
+        },
+        {
+          "name": {
+            "value": "Company"
+          }
+        },
+        {
+          "name": {
+            "value": "Organization"
+          }
+        },
+        {
+          "name": {
+            "value": "Movie"
+          }
+        },
+        {
+          "name": {
+            "value": "Actor"
+          }
+        },
+        {
+          "name": {
+            "value": "Place"
+          }
+        },
+        {
+          "name": {
+            "value": "City"
+          }
+        },
+        {
+          "name": {
+            "value": "Country"
+          }
+        },
+        {
+          "name": {
+            "value": "Book"
+          }
+        },
+        {
+          "name": {
+            "value": "Review"
+          }
+        },
+        {
+          "name": {
+            "value": "Comment"
+          }
+        },
+        {
+          "name": {
+            "value": "Article"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Verb",
+      "values": [
+        {
+          "name": {
+            "value": "connected to"
+          }
+        },
+        {
+          "name": {
+            "value": "related to"
+          }
+        },
+        {
+          "name": {
+            "value": "acted in"
+          }
+        },
+        {
+          "name": {
+            "value": "directed"
+          }
+        },
+        {
+          "name": {
+            "value": "produced"
+          }
+        },
+        {
+          "name": {
+            "value": "lives in"
+          }
+        },
+        {
+          "name": {
+            "value": "located in"
+          }
+        },
+        {
+          "name": {
+            "value": "parent of"
+          }
+        },
+        {
+          "name": {
+            "value": "created"
+          }
+        },
+        {
+          "name": {
+            "value": "posted"
+          }
+        },
+        {
+          "name": {
+            "value": "wrote"
+          }
+        },
+        {
+          "name": {
+            "value": "tagged"
+          }
+        },
+        {
+          "name": {
+            "value": "answered"
+          }
+        },
+        {
+          "name": {
+            "value": "hosted"
+          }
+        },
+        {
+          "name": {
+            "value": "reviewed"
+          }
+        },
+        {
+          "name": {
+            "value": "rated"
+          }
+        }
+      ]
+    }
+  ]
+}
