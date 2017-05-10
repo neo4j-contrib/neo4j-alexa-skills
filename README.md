@@ -29,3 +29,37 @@ composer install
 docker-compose up
 ```
 
+### Skills
+
+This is the Skill-APP URL to configure: `https://neo4j-alexa-skills.herokuapp.com/intent`
+
+Skills: see also [skills.json](https://github.com/neo4j-contrib/neo4j-alexa-skills/blob/master/skill.json)
+
+"Computer, ask Cypher ..."
+
+* nodeCount: "Count {nodeLabel} nodes"
+* findBetween: "Who is between {first} and {second} in {database}"
+* neighbours: "What is {type} node {name} in {database}"
+
+### Database Prep
+
+For instance create an alexa:alexa user on sandbox databases and use them.
+
+Also run this procedure call (on the labels + properties in your database).
+
+```
+call apoc.index.addAllNodes('search',{Person:['name'],Organization:['name']})
+```
+
+### Configuration
+
+You configure databases to select from via `heroku config`
+
+the `_name` suffix is used to select the database to search in.
+
+```
+heroku config:set NEO4J_URL_community=http://alexa:alexa@x.x.x.x:7474
+heroku config:set NEO4J_URL_movies=http://alexa:alexa@x.x.x.x:33296
+heroku config:set NEO4J_URL_panamapapers=http://alexa:alexa@x.x.x.x:33568
+heroku config:set NEO4J_URL_trumpworld=http://alexa:alexa@x.x.x.x:32874
+```
