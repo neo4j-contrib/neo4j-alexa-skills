@@ -71,12 +71,12 @@ class IntentController extends Controller
         $database = array_key_exists('database', $slots) ? strtolower(str_replace(" ","",$slots['database'])): "default";
         if (array_key_exists('nodeLabel', $slots)) {
 
-            $label = $this->extractLabel($slots['nodeLabel'], $client);
+            $label = $this->extractLabel($slots['nodeLabel'], $client, $database);
             $result = $this->countNodes($label, $client, $database);
             if ($result > 0)
                 $response = sprintf('There are %d %s nodes in the database', $result, $label);
             else
-                $response = sprintf('There are %d total nodes in the database', $this->countNodes("",$client,$database));
+                $response = sprintf('There are %d total nodes in the database', $this->countNodes("", $client, $database));
         }
 
         return $this->returnAlexaResponse('Nodes Count', self::TEXT_TYPE, $response);
@@ -145,9 +145,9 @@ class IntentController extends Controller
         return $this->returnAlexaResponse('Neighbours of', self::TEXT_TYPE, $response);
     }
 
-    private function extractLabel(?string $input, Client $client) : string
+    private function extractLabel(?string $input, Client $client, ?string $database) : string
     {
-        $labels = $this->getDatabaseLabels($client);
+        $labels = $this->getDatabaseLabels($client, [], null, $database);
         $found = LevenshteinLabel::getNearest($input, $labels);
 
         if ('' === $found || 0 === count($labels)) {
