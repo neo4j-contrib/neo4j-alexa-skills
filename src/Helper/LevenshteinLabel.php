@@ -8,6 +8,9 @@ class LevenshteinLabel
 {
     public static function getNearest($input, array $labels) : string
     {
+        if (null === $input) {
+            return '';
+        }
         $input = strtolower(trim($input));
         $closest = '';
         $shortest = -1;

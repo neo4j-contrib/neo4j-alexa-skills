@@ -145,7 +145,7 @@ class IntentController extends Controller
         return $this->returnAlexaResponse('Neighbours of', self::TEXT_TYPE, $response);
     }
 
-    private function extractLabel(string $input, Client $client) : string
+    private function extractLabel(?string $input, Client $client) : string
     {
         $labels = $this->getDatabaseLabels($client);
         $found = LevenshteinLabel::getNearest($input, $labels);
