@@ -120,7 +120,7 @@ class IntentController extends Controller
         	$type = array_key_exists('type', $slots) ? (":`" . strtoupper(str_replace(" ","_",$slots['type']))) ."`" : "";
             $query = "CALL apoc.index.search('search',{name}+'~') yield node as from " .
             "RETURN coalesce(from.name, from.title, {name}) as from, size((from)-[".$type."]-()) as count, " .
-            "[(from)-[".$type."]-(to) | coalesce(to.name, to.title, to.description, id(to))][0..{limit}] as neighbours";
+            "[(from)-[".$type."]-(to) | coalesce(to.name, to.title, substring(to.text,0,20), substring(to.description,0,20), id(to))][0..{limit}] as neighbours";
 
             $log->addDebug($query."; name:".$slots['name']." ".$database);
             $result = $client->run(
