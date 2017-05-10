@@ -23,7 +23,7 @@ class IntentController extends Controller
 
             $intent = $content['request']['intent']['name'];
             $slots = [];
-            $application['monolog']->addDebug($request->getContent());
+            $application['monolog']->addWarning($request->getContent());
             foreach ($content['request']['intent']['slots'] as $slot) {
                 $slots[$slot['name']] = $slot['value'];
             }
